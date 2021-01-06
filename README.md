@@ -48,10 +48,10 @@ Finetuning on split 1 of UCF101 dataset:
 python main.py --video_path $DATA_PATH --result $RESULT_PATH \
                --dataset_file ./datasets/ucf_list/ucf101_01.json \
                --dataset ucf101 --phase finetuning \
-	             --pretrain_path $PRETRAIN_WEIGHT_PATH \
-	             --n_finetune_classes 101 --n_epochs 100 \
+	       --pretrain_path $PRETRAIN_WEIGHT_PATH \
+	       --n_finetune_classes 101 --n_epochs 100 \
                --batch_size 128 --n_threads 16 \
-	             --lr_patience 5 --dp 0.8 --lr_factor 0.1 \
+	       --lr_patience 5 --dp 0.8 --lr_factor 0.1 \
                --learning_rate 0.02 --weight_decay 1e-4 \
                --stride_size 4 --sample_duration 64 \
                --dist-url 'tcp://localhost:10001' --multiprocessing-distributed --world-size 1 --rank 0
@@ -65,10 +65,10 @@ Finetuning on split 1 of HMDB51 dataset:
 python main.py --video_path $DATA_PATH --result $RESULT_PATH \
                --dataset_file ./datasets/hmdb_list/hmdb51_1.json \
                --dataset hmdb51 --phase finetuning \
-	             --pretrain_path $PRETRAIN_WEIGHT_PATH \
-	             --n_finetune_classes 51 --n_epochs 100 \
+	       --pretrain_path $PRETRAIN_WEIGHT_PATH \
+	       --n_finetune_classes 51 --n_epochs 100 \
                --batch_size 128 --n_threads 16 \
-	             --lr_patience 5 --dp 0.8 --lr_factor 0.1 \
+	       --lr_patience 5 --dp 0.8 --lr_factor 0.1 \
                --learning_rate 0.02 --weight_decay 1e-4 \
                --stride_size 4 --sample_duration 64 \
                --dist-url 'tcp://localhost:10001' --multiprocessing-distributed --world-size 1 --rank 0
