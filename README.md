@@ -1,7 +1,7 @@
 # Learning Spatiotemporal Features via Video and Text Pair Discrimination
 An official PyTorch implementation of [CPD](https://arxiv.org/abs/2001.05691).
 ## Overview
-In this repo, we release codes of our CPD model. It contains two parts: pre-training spatiotemporal features on uncurated web dataset Instagram-300k and finetuning models on downstream datasets UCF101 and HMDB51 for evaluation. We also provide [weights](https://drive.google.com/file/d/1itG7_rdSMwVRmdiD9BJwkfzz1eV1AZ_i/view?usp=sharing) of CPD model pre-trained on Instagram-300k.
+In this repo, we release codes of our CPD model. It contains two parts: pre-training spatiotemporal features on uncurated web dataset Instagram-300k and finetuning pre-trained models on downstream datasets UCF101 and HMDB51 for evaluation. We also provide [weights](https://drive.google.com/file/d/1itG7_rdSMwVRmdiD9BJwkfzz1eV1AZ_i/view?usp=sharing) of CPD model pre-trained on Instagram-300k.
 ## Requriments
 The code is built with following libraries:
 
