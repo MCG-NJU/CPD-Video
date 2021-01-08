@@ -45,7 +45,7 @@ def get_video_names_and_annotations(data, subset):
 
 class UcfHmdb(data.Dataset):
     """
-        ucf101 dataset for evaluating representation transfer.
+        ucf101 and hmdb51 dataset for evaluating representation transfer.
     """
 
     def __init__(self,
@@ -224,7 +224,6 @@ class UcfHmdb(data.Dataset):
                     frames, min_scale, max_scale
                 )
                 frames = random_crop(frames, crop_size)
-                frames = horizontal_flip(0.5, frames)
         else:
             # The testing is deterministic and no jitter should be performed.
             # min_scale, max_scale, and crop_size are expect to be the same.

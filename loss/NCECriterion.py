@@ -4,7 +4,7 @@ from torch import nn
 eps = 1e-7
 
 class NCECriterion(nn.Module):
-    
+
     def __init__(self, n_data):
         super(NCECriterion, self).__init__()
         self.n_data = n_data

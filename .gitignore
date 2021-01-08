@@ -25,7 +25,6 @@ wheels/
 .installed.cfg
 *.egg
 results*/
-*_list/
 skip-thoughts
 *.pth
 runs/

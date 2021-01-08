@@ -1,16 +1,15 @@
-import torch
-import torch.utils.data as data
 import os
 import json
 import random
-import numpy as np
-import threading
+
+import torch
+import torch.utils.data as data
 from transformers import DistilBertTokenizer
 
 from datasets.decoder import decode
 from datasets.transform import (random_short_side_scale_jitter,
                                 random_crop, horizontal_flip,
-                                uniform_crop, color_drop)
+                                uniform_crop)
 from datasets.video_container import get_video_container
 
 
@@ -48,7 +47,7 @@ class Instagram(data.Dataset):
         print('Making dataset...')
         self.make_dataset(root_path, list_file, video_tmpl, subset)
 
-    def make_dataset(self, video_prefix_path, list_file, video_tmpl, subset):
+    def make_dataset(self, video_prefix_path, list_file, video_tmpl):
         self._data = []
 
         with open(list_file, 'r') as load_f:
@@ -148,12 +147,12 @@ class Instagram(data.Dataset):
 
     @torch.no_grad()
     def spatial_sampling(
-        self,
-        frames,
-        spatial_idx=-1,
-        min_scale=256,
-        max_scale=320,
-        crop_size=224,
+            self,
+            frames,
+            spatial_idx=-1,
+            min_scale=256,
+            max_scale=320,
+            crop_size=224,
     ):
         """
         Modify from pySlowFast('https://github.com/facebookresearch/SlowFast')

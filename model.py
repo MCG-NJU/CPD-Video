@@ -89,21 +89,22 @@ def generate_model(opt):
                 model, opt.learning_rate, opt.lr_bert)
             return model, parameters
         elif opt.phase == 'finetuning':
-            print('loading pretrained model {}'.format(opt.pretrain_path))
-            pretrain = torch.load(opt.pretrain_path, map_location='cuda:{}'.format(opt.gpu))
+            if opt.pretrain_path is not None:
+                print('loading pretrained model {}'.format(opt.pretrain_path))
+                pretrain = torch.load(opt.pretrain_path, map_location='cuda:{}'.format(opt.gpu))
 
-            new_state_dict = OrderedDict()
-            for name, weights in pretrain['state_dict'].items():
-                if 'visual_encoder' in name:
-                    new_state_dict[name.replace(
-                        'visual_encoder.', '')] = weights
+                new_state_dict = OrderedDict()
+                for name, weights in pretrain['state_dict'].items():
+                    if 'visual_encoder' in name:
+                        new_state_dict[name.replace(
+                            'visual_encoder.', '')] = weights
 
-            x = model.state_dict()
-            for k in x.keys():
-                if k not in new_state_dict.keys():
-                    print('Missing Keys: ', k)
-            x.update(new_state_dict)
-            model.load_state_dict(x)
+                x = model.state_dict()
+                for k in x.keys():
+                    if k not in new_state_dict.keys():
+                        print('Missing Keys: ', k)
+                x.update(new_state_dict)
+                model.load_state_dict(x)
             model.module.fc = nn.Linear(
                 model.module.fc.in_features, opt.n_finetune_classes).cuda()
             parameters = get_fine_tuning_parameters(

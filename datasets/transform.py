@@ -63,7 +63,7 @@ def random_crop(images, size):
     if width > size:
         x_offset = int(np.random.randint(0, width - size))
     cropped = images[
-        :, :, y_offset : y_offset + size, x_offset : x_offset + size
+        :, :, y_offset: y_offset + size, x_offset: x_offset + size
     ]
     return cropped
 
@@ -116,9 +116,10 @@ def uniform_crop(images, size, spatial_idx):
         elif spatial_idx == 2:
             x_offset = width - size
     cropped = images[
-        :, :, y_offset : y_offset + size, x_offset : x_offset + size
+        :, :, y_offset: y_offset + size, x_offset: x_offset + size
     ]
     return cropped
+
 
 def color_drop(prob, images):
     '''

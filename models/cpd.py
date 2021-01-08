@@ -16,10 +16,8 @@ class CPD(nn.Module):
         super(CPD, self).__init__()
 
         self.visual_encoder = visual_encoder
-        # self.textual_encoder = DistilBertModel.from_pretrained(
-        #     'distilbert-base-uncased')
         self.textual_encoder = DistilBertModel.from_pretrained(
-            '/home/lmwang/lth/bert_model')
+            'distilbert-base-uncased')
 
         self.emb_dim = emb_dim
         self.dropout = dropout
@@ -138,7 +136,7 @@ class Identity(torch.nn.Module):
         return input
 
 
-def get_fine_tuning_parameters(model, lr, lr_bert):
+def get_fine_tuning_parameters(model, lr):
     """Set small learning rate on bert"""
 
     parameters = []
@@ -154,18 +152,19 @@ def get_fine_tuning_parameters(model, lr, lr_bert):
 def concat_all_gather(tensor):
     """
     Performs all_gather operation on the provided tensors.
-    *** Warning ***: torch.distributed.all_gather has no gradient.
+    *** Warning ***: dist.all_gather has no gradient.
     """
     tensors_gather = [torch.ones_like(tensor)
                       for _ in range(torch.distributed.get_world_size())]
-    torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
+    dist.all_gather(tensors_gather, tensor, async_op=False)
 
     output = torch.cat(tensors_gather, dim=0)
     return output
 
 
+@torch.no_grad()
 def reduce_tensor(tensor):
-    rt = tensor.clone()
-    dist.all_reduce(rt, op=dist.ReduceOp.SUM)
-    rt /= dist.get_world_size()
-    return rt
+    output = tensor.clone()
+    dist.all_reduce(output, op=dist.ReduceOp.SUM)
+    output /= dist.get_world_size()
+    return output

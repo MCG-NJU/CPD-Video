@@ -18,6 +18,7 @@ import test
 from opts import parse_opts
 from model import generate_model
 from dataset import get_training_set, get_validation_set, get_test_set
+from datasets.ucf101 import get_video_names_and_annotations
 from utils import Logger, accuracy, AverageMeter
 from loss.NCECriterion import NCECriterion
 
@@ -43,14 +44,21 @@ def main():
         opt.world_size = ngpus_per_node * opt.world_size
         # Use torch.multiprocessing.spawn to launch distributed processes: the
         # main_worker process function
-        mp.spawn(main_worker, nprocs=ngpus_per_node,
-                 args=(ngpus_per_node, opt))
+        if not opt.test:
+            mp.spawn(main_worker, nprocs=ngpus_per_node,
+                     args=(ngpus_per_node, opt))
+        else:
+            ctx = mp.get_context('spawn')
+            test_results = ctx.Queue()
+            mp.spawn(main_worker, nprocs=ngpus_per_node,
+                     args=(ngpus_per_node, opt, test_results))
+
     else:
         # Simply call main_worker function
         main_worker(opt.gpu, ngpus_per_node, opt)
 
 
-def main_worker(gpu, ngpus_per_node, opt):
+def main_worker(gpu, ngpus_per_node, opt, test_results=None):
     opt.gpu = gpu
 
     # suppress printing if not master
@@ -146,16 +154,34 @@ def main_worker(gpu, ngpus_per_node, opt):
         val_logger = Logger(
             os.path.join(opt.result_path, 'val.log.rank{}'.format(opt.rank)),
             ['epoch', 'acc1', 'acc5'] if opt.phase == 'finetuning' else ['epoch', 'recall@1', 'recall@10'])
+    
+    if opt.test:
+        model, parameters = generate_model(opt)
+
+        test_data = get_test_set(opt)
+        idx_to_labels = test_data.get_idx_to_label()
+        if opt.distributed:
+            test_sampler = torch.utils.data.distributed.DistributedSampler(
+                test_data, shuffle=False)
+        else:
+            test_sampler = None
+        test_loader = torch.utils.data.DataLoader(
+            test_data,
+            batch_size=opt.batch_size,
+            shuffle=(test_sampler is None),
+            num_workers=opt.n_threads,
+            pin_memory=True,
+            drop_last=False,
+            sampler=test_sampler)
 
     if opt.resume_path:
-        print('loading checkpoint {}'.format(opt.resume_path))
+        print('==>loading checkpoint {}'.format(opt.resume_path))
         if opt.gpu is None:
             checkpoint = torch.load(opt.resume_path)
         else:
             # Map model to be loaded to specified single gpu.
             loc = 'cuda:{}'.format(opt.gpu)
             checkpoint = torch.load(opt.resume_path, map_location=loc)
-        # assert opt.arch == checkpoint['arch'], "{} != {}".format(opt.arch, checkpoint['arch'])
 
         opt.begin_epoch = checkpoint['epoch']
         model.load_state_dict(checkpoint['state_dict'])
@@ -191,17 +217,21 @@ def main_worker(gpu, ngpus_per_node, opt):
                 adjuest_learning_rate(optimizer, i, opt)
 
     if opt.test:
-        model, parameters = generate_model(opt)
+        test.test(test_loader, model, opt, idx_to_labels, test_results)
+        if opt.multiprocessing_distributed and opt.gpu == 0:
+            result_json = {}
+            finish_procs = 0
+            while(finish_procs < ngpus_per_node):
+                rst = test_results.get()
+                if rst == -1:
+                    finish_procs += 1
+                else:
+                    result_json[rst[0]] = rst[1]
+            with open(
+                os.path.join(opt.result_path, '{}.json'.format(opt.test_subset)),
+                    'w') as f:
+                json.dump({'results': result_json}, f)
 
-        test_data = get_test_set(opt)
-        idx_to_labels = test_data.get_idx_to_label()
-        test_loader = torch.utils.data.DataLoader(
-            test_data,
-            batch_size=opt.batch_size,
-            shuffle=False,
-            num_workers=opt.n_threads,
-            pin_memory=True)
-        test.test(test_loader, model, opt, idx_to_labels)
 
 
 def train_epoch(epoch, data_loader, model, criterion, optimizer, opt,
@@ -415,7 +445,7 @@ def concat_all_gather(tensor):
     """
     tensors_gather = [torch.ones_like(tensor)
                       for _ in range(torch.distributed.get_world_size())]
-    torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
+    dist.all_gather(tensors_gather, tensor, async_op=False)
 
     output = torch.cat(tensors_gather, dim=0)
     return output

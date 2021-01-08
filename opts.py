@@ -11,6 +11,8 @@ def parse_opts():
                         type=str, help='Result directory path')
     parser.add_argument('--dataset', default='ins',
                         type=str, help='Used dataset (ins | ucf101 | hmdb51)')
+    parser.add_argument('--test_subset', default='val',
+                        type=str, help='validation set or test set for testing')
     parser.add_argument('--n_classes', default=256,
                         type=int, help='Number of classes (ucf101: 101, hmdb51: 51)')
     parser.add_argument('--n_finetune_classes', default=101,
@@ -57,7 +59,7 @@ def parse_opts():
 
     parser.add_argument('--resume_path', default='', type=str,
                         help='Save data (.pth) of previous training')
-    parser.add_argument('--pretrain_path', default='',
+    parser.add_argument('--pretrain_path', default=None,
                         type=str, help='Pretrained model (.pth)')
     parser.add_argument('--ft_begin_index', default=0, type=int,
                         help='Begin block index of fine-tuning')
