@@ -16,8 +16,10 @@ class CPD(nn.Module):
         super(CPD, self).__init__()
 
         self.visual_encoder = visual_encoder
+        # self.textual_encoder = DistilBertModel.from_pretrained(
+        #     'distilbert-base-uncased')
         self.textual_encoder = DistilBertModel.from_pretrained(
-            'distilbert-base-uncased')
+            '/home/lmwang/lth/bert_model')
 
         self.emb_dim = emb_dim
         self.dropout = dropout
