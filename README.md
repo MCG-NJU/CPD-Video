@@ -47,7 +47,7 @@ python main.py --video_path <DATA_PATH> --result <RESULT_PATH> \
                --dist-url 'tcp://localhost:10001' --multiprocessing-distributed --world-size 1 --rank 0
 ```
 
-`<DATA_PATH>` is your data directory and `<RESULT_PATH>` is the path to store checkpoints and training log. More parameters and their meaning can be found in `opts.py`. We do experiments on 8 V100(32G) GPUs.
+`<DATA_PATH>` is your data directory and `<RESULT_PATH>` is the path to store checkpoints and training log. More parameters and their meaning can be found in `opts.py`. We do experiments on 8 NVIDIA V100(32G) GPUs.
 
 ## Evaluation on Downstream Datasets
 
@@ -67,6 +67,8 @@ python main.py --video_path <DATA_PATH> --result <RESULT_PATH> \
 ```
 
 `<PRETRAIN_WEIGHT_PATH>` is the path of your pre-trained weight. You can pre-train a model by yourself or use our provided [model](https://drive.google.com/file/d/1itG7_rdSMwVRmdiD9BJwkfzz1eV1AZ_i/view?usp=sharing). Since the UCF101 dataset has 3 splits, you should change the `--dataset_file` and run it 3 times.
+
+For training a linear classifier on frozen features (linear probes in self-supervised learning), add `--ft_begin_index 5` to above scripts and change the learning rate to 2 or 20.
 
 After finetuning on the UCF101 dataset, we can test the performance on the validation set using 3 crops, 10 clips test setting. The testing scripts are as follow:
 
@@ -105,9 +107,10 @@ python evaluation/evaluate_ucf101.py --dataset $dataset --pred_results $pred_pat
 
 Average finetuning results on 3 splits of UCF101 and HMDB51 datasets:
 
-|                   | UCF101 top-1 acc. | HMDB51 top-1 acc. |
-| :---------------: | :---------------: | :---------------: |
-| CPD (3D ResNet-50) |       92.8        |       63.6        |
+|                   | *frozen* | UCF101 top-1 acc. | HMDB51 top-1 acc. |
+| :---------------: | :---------------: | :---------------: | :---------------: |
+| CPD (3D ResNet-50) |     *&radic;* |    83.7    | 54.7 |
+| CPD (3D ResNet-50) |  | 92.8 | 63.6 |
 
 Note that we choose the last checkpoint for each training and the same finetuning schedule for different datasets by default. Selecting the best-performing epoch and carefully adjusting the finetuning hyper-parameters (e.g. lr, wd ...) can get further performance improvements.
 

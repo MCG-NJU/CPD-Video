@@ -238,18 +238,16 @@ def get_fine_tuning_parameters(model, ft_begin_index, lr):
     for i in range(ft_begin_index, 5):
         ft_module_names.append('layer{}'.format(i))
     ft_module_names.append('fc')
+    
     parameters = []
-    bn_cnt = 0
-    for k, v in model.named_parameters():
-        if 'bn' in k:
-            bn_cnt += 1
-            if bn_cnt <= 2:
-                parameters.append({'params': v, 'lr': lr})
-            else:
-                print("freezing {}".format(k))
-                parameters.append({'params': v, 'lr': 0})
+    for name, param in model.named_parameters():
+        for ft_module in ft_module_names:
+            if ft_module in name:
+                parameters.append({'params': param})
+                print('update:', name)
+                break
         else:
-            parameters.append({'params': v, 'lr': lr})
+            param.requires_grad = False
     return parameters
 
 
