@@ -86,7 +86,7 @@ def generate_model(opt):
 
         if opt.phase == 'pretraining':
             parameters = get_fine_tuning_parameters(
-                model, opt.learning_rate, opt.lr_bert)
+                model, opt.learning_rate)
             return model, parameters
         elif opt.phase == 'finetuning':
             if opt.pretrain_path is not None:
