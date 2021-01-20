@@ -45,7 +45,7 @@ class Instagram(data.Dataset):
         self._max_sentence_length = max_sentence_length
 
         print('Making dataset...')
-        self.make_dataset(root_path, list_file, video_tmpl, subset)
+        self.make_dataset(root_path, list_file, video_tmpl)
 
     def make_dataset(self, video_prefix_path, list_file, video_tmpl):
         self._data = []
